@@ -48,12 +48,14 @@ def main():
             if len(links) == 0:
                 logger.warning('No search results.')
                 failed_file.write('\t{}\t{}\n'.format(archive_details_urls[i], google_search_urls[i]))
+                failed_file.flush()
                 continue
 
             site_index, link = get_certain_link(links)
             if site_index == -1:
                 logger.warning('No matched site.')
                 failed_file.write('\t{}\t{}\n'.format(archive_details_urls[i], google_search_urls[i]))
+                failed_file.flush()
                 continue
 
             logger.info('Matched site: {}'.format(link))
@@ -69,11 +71,13 @@ def main():
             if date == '':
                 logger.warning('Date not found.')
                 failed_file.write('\t{}\t{}\n'.format(archive_details_urls[i], google_search_urls[i]))
+                failed_file.flush()
                 continue
             else:
                 logger.info('Date: {}'.format(date))
 
             f.write('{}\t{}\t{}\n'.format(archive_details_urls[i], date, link))
+            f.flush()
 
 
 if __name__ == '__main__':
