@@ -1,7 +1,8 @@
 from myLogger import logger
 import scraper
 
-sites = ['http://www.78discography.com/', 'http://www.45worlds.com/78rpm/', 'http://adp.library.ucsb.edu/']
+# sites = ['http://www.78discography.com/', 'http://www.45worlds.com/78rpm/', 'http://adp.library.ucsb.edu/']
+sites = ['http://www.78discography.com/', 'http://www.45worlds.com/78rpm/']
 
 
 def get_certain_link(links):
@@ -16,6 +17,7 @@ def main():
     archive_details_urls = []
     google_search_urls = []
     with open('78dates.txt', mode='r', encoding='utf-8') as f:
+    # with open('78dates_new.txt', mode='r', encoding='utf-8') as f:
     # with open('test.txt', mode='r', encoding='utf-8') as f:
         row_number = 1
         for row in f:
@@ -31,20 +33,21 @@ def main():
             archive_details_urls.append(data[1])
             google_search_urls.append(data[2])
 
-    failed_file = open('failed.csv', 'w')
+    failed_file = open('failed.txt', 'w')
 
     with open('result.txt', 'w') as f:
         for i in range(len(archive_details_urls)):
-            logger.info('Searching for -- {} --\n archive url: {}\n google_search_url: {}'.format(i, archive_details_urls[i], google_search_urls[i]))
+            logger.info('Searching for -- {} --\n archive url: {}\n google_search_url: {}'.format(i+1, archive_details_urls[i], google_search_urls[i]))
             links = scraper.google_search(google_search_urls[i])
             if len(links) == 0:
                 logger.warning('No search results.')
+                failed_file.write('\t{}\t{}\n'.format(archive_details_urls[i], google_search_urls[i]))
                 continue
 
             site_index, link = get_certain_link(links)
             if site_index == -1:
                 logger.warning('No matched site.')
-                failed_file.write('{},{}'.format(archive_details_urls[i], google_search_urls[i]))
+                failed_file.write('\t{}\t{}\n'.format(archive_details_urls[i], google_search_urls[i]))
                 continue
 
             logger.info('Matched site: {}'.format(link))
@@ -57,13 +60,14 @@ def main():
                 date = scraper.scrape_45worlds(archive_details_urls[i], link)
             elif site_index == 2:
                 date = scraper.scrpae_adp(archive_details_urls[i], link)
-                break
             if date == '':
                 logger.warning('Date not found.')
+                failed_file.write('\t{}\t{}\n'.format(archive_details_urls[i], google_search_urls[i]))
+                continue
             else:
                 logger.info('Date: {}'.format(date))
 
-            f.write('{}\t{}\t{}'.format(archive_details_urls[i], date, link))
+            f.write('{}\t{}\t{}\n'.format(archive_details_urls[i], date, link))
 
 
 if __name__ == '__main__':

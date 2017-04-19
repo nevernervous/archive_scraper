@@ -113,7 +113,11 @@ def scrpae_adp(archive_url, url):
 def date_parsing(date_string):
     if date_string == '' or date_string == '-':
         return ''
-    year = str(parse(date_string).year)
+    try:
+        year = str(parse(date_string).year)
+    except ValueError:
+        logger.error('Date string is unknown string format.  {}'.format(date_string))
+        return ''
 
     if not year:
         return ''
