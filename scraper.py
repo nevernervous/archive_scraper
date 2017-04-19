@@ -41,12 +41,19 @@ def get_archive_metadata(url):
     metadata = json.loads(urlopen(url).read().decode())
     catalog_number = metadata['result']['external-identifier'][1]
     catalog_number = catalog_number[catalog_number.rfind(':') + 1:]
-    return {
+    catalog_number = re.search('\d*', catalog_number).group()
+    if type(metadata['result']['creator']) is str:
+        creator = metadata['result']['creator'].lower()
+    else:
+        creator = metadata['result']['creator'][0].lower()
+    data = {
         'title': metadata['result']['title'].lower(),
-        'creator': metadata['result']['creator'][0].lower(),
+        'creator': creator,
         'publisher': metadata['result']['publisher'].lower(),
-        'catalogNumber': catalog_number.split()[0]
+        'catalogNumber': catalog_number
     }
+    logger.info('publisher: {}\n catalog_number: {}\n title: {}\n creator: {}'.format(data['publisher'], data['catalogNumber'], data['title'], data['creator']))
+    return data
 
 
 def scrape_78discography(archive_url, url):
@@ -55,9 +62,9 @@ def scrape_78discography(archive_url, url):
     soup = get_soup(url)
     publisher = soup.body.h1.center.string.lower()
 
-    if not publisher.startswith(metadata['publisher'].lower()):
+    if not publisher.startswith(metadata['publisher']):
         logger.warning('Publisher is not matched.')
-        return date
+        return ''
 
     for item in soup.find_all('td', text=metadata['catalogNumber']):
         td_list = item.parent.select('td')
@@ -78,12 +85,28 @@ def scrape_45worlds(archive_url, url):
 
     metadata = get_archive_metadata(archive_url)
     soup = get_soup(url)
-    # publisher = soup.body.h1.center.string.lower()
+    label_td = soup.find('td', text='Label:')
+    if not label_td:
+        return ''
+
+    publisher = label_td.next_sibling.a.string.lower()
+    if not publisher.startswith(metadata['publisher']):
+        logger.warning('Publisher is not matched.')
+        return ''
+
+    catalog_tr = label_td.parent.next_sibling.next_sibling
+    if metadata['catalogNumber'] == catalog_tr.contents[1].string:
+        date = date_parsing(catalog_tr.next_sibling.contents[1].string)
+    else:
+        logger.warning('catalogNumber is not matched.')
+
     return date
 
 
 def scrpae_adp(archive_url, url):
     date = ''
+    # metadata = get_archive_metadata(archive_url)
+    # soup = get_soup(url)
     return date
 
 
