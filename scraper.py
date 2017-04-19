@@ -60,9 +60,9 @@ def scrape_78discography(archive_url, url):
     date = ''
     metadata = get_archive_metadata(archive_url)
     soup = get_soup(url)
-    publisher = soup.body.h1.center.string.lower()
+    page_title = soup.title.string.lower()
 
-    if not publisher.startswith(metadata['publisher']):
+    if metadata['publisher'] not in page_title:
         logger.warning('Publisher is not matched.')
         return ''
 
@@ -116,6 +116,7 @@ def date_parsing(date_string):
     try:
         year = str(parse(date_string).year)
     except ValueError:
+
         logger.error('Date string is unknown string format.  {}'.format(date_string))
         return ''
 

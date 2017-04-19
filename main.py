@@ -27,7 +27,7 @@ def main():
     # with open('test.txt', mode='r', encoding='utf-8') as f:
         row_number = 1
         for row in f:
-            data = row.split('\t')
+            data = row.rstrip('\n').split('\t')
             row_number += 1
             if len(data) != 3:
                 logger.warning('Input data in {:d} row is not valid.'.format(row_number))
