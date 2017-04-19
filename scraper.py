@@ -41,18 +41,23 @@ def get_archive_metadata(url):
     metadata = json.loads(urlopen(url).read().decode())
     catalog_number = metadata['result']['external-identifier'][1]
     catalog_number = catalog_number[catalog_number.rfind(':') + 1:]
-    catalog_number = re.search('\d*', catalog_number).group()
-    if type(metadata['result']['creator']) is str:
-        creator = metadata['result']['creator'].lower()
-    else:
-        creator = metadata['result']['creator'][0].lower()
+    catalog_number = catalog_number.replace(" ", "")
+    catalog_number = re.search('[a-zA-Z]*(\d*)', catalog_number).group(1)
+
+    # if type(metadata['result']['creator']) is str:
+    #     creator = metadata['result']['creator'].lower()
+    # else:
+    #     creator = metadata['result']['creator'][0].lower()
+
     data = {
         'title': metadata['result']['title'].lower(),
-        'creator': creator,
+        # 'creator': creator,
         'publisher': metadata['result']['publisher'].lower(),
         'catalogNumber': catalog_number
     }
-    logger.info('publisher: {}\n catalog_number: {}\n title: {}\n creator: {}'.format(data['publisher'], data['catalogNumber'], data['title'], data['creator']))
+
+    # logger.info('publisher: {}\n catalog_number: {}\n title: {}\n creator: {}'.format(data['publisher'], data['catalogNumber'], data['title'], data['creator']))
+    logger.info('publisher: {}\n catalog_number: {}\n title: {}'.format(data['publisher'], data['catalogNumber'], data['title']))
     return data
 
 
@@ -71,9 +76,9 @@ def scrape_78discography(archive_url, url):
 
         # creator = td_list[1].string
 
-        title = td_list[2].string
-
-        if title.lower() == metadata['title']:
+        title = td_list[2].string.replace(" ", "")
+        metadata['title'] = metadata['title'].replace(" ", "")
+        if metadata['title'] in title.lower():
             date = date_parsing(td_list[6].string)
             break
 
@@ -115,13 +120,18 @@ def date_parsing(date_string):
         return ''
     try:
         year = str(parse(date_string).year)
+        year = year[2:]
     except ValueError:
-
-        logger.error('Date string is unknown string format.  {}'.format(date_string))
-        return ''
+        reg = re.compile('.*/.*/(.*)')
+        m = reg.match(date_string)
+        if not m:
+            logger.warning('Date string is unknown string format.  {}'.format(date_string))
+            return ''
+        else:
+            year = m.group(1)
 
     if not year:
         return ''
 
-    return '19' + year[2:]
+    return '19' + year
 
