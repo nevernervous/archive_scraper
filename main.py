@@ -5,8 +5,8 @@ sites = ['http://www.78discography.com/', 'http://www.45worlds.com/78rpm/', 'htt
 
 
 def get_certain_link(links):
-    for link in links:
-        for i in range(len(sites)):
+    for i in range(len(sites)):
+        for link in links:
             if link.startswith(sites[i]):
                 return i, link
     return -1, None
@@ -16,6 +16,7 @@ def main():
     archive_details_urls = []
     google_search_urls = []
     with open('78dates.txt', mode='r', encoding='utf-8') as f:
+    # with open('test.txt', mode='r', encoding='utf-8') as f:
         row_number = 1
         for row in f:
             data = row.split('\t')
@@ -34,7 +35,7 @@ def main():
 
     with open('result.txt', 'w') as f:
         for i in range(len(archive_details_urls)):
-            logger.info('Searching for -- {} --: {}'.format(i, archive_details_urls[i]))
+            logger.info('Searching for -- {} --\n archive url: {}\n google_search_url: {}'.format(i, archive_details_urls[i], google_search_urls[i]))
             links = scraper.google_search(google_search_urls[i])
             if len(links) == 0:
                 logger.warning('No search results.')
@@ -51,15 +52,12 @@ def main():
             date = ''
 
             if site_index == 0:
-                continue
                 date = scraper.scrape_78discography(archive_details_urls[i], link)
             elif site_index == 1:
                 date = scraper.scrape_45worlds(archive_details_urls[i], link)
-                break
             elif site_index == 2:
                 date = scraper.scrpae_adp(archive_details_urls[i], link)
                 break
-
             if date == '':
                 logger.warning('Date not found.')
             else:
@@ -68,10 +66,8 @@ def main():
             f.write('{}\t{}\t{}'.format(archive_details_urls[i], date, link))
 
 
-
-
-
 if __name__ == '__main__':
+    logger.info('Start Scraping.')
     main()
 
 
