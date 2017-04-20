@@ -105,10 +105,17 @@ def scrape_78discography(archive_url, url):
             logger.warning('Publisher is not matched.')
             return ''
 
+    ''' catalog_number example
+        5686
+        5686B
+        5686 B
+        20-4202
+        No. 10287 --- https://archive.org/details/78_hot-tamale-mollie_al-bernard-weslyn--kortlander_gbia0002465a
+    '''
     catalog_number = metadata['catalogNumber']
     catalog_number = catalog_number.replace(" ", "")
     catalog_number = catalog_number.replace("-", "")
-    catalog_number = re.search('[a-zA-Z ]*(\d*)', catalog_number).group(1)
+    catalog_number = re.search('[a-zA-Z .]*(\d*)', catalog_number).group(1)
 
     for item in soup.find_all('td', text=re.compile('[a-zA-Z -]*({})'.format(catalog_number))):
         td_list = item.parent.select('td')
