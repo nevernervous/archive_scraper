@@ -77,11 +77,15 @@ def scrape_78discography(archive_url, url):
         # creator = td_list[1].string
 
         title = td_list[2].string.replace(" ", "")
+        title = title.lower()
         metadata['title'] = metadata['title'].replace(" ", "")
-        if metadata['title'] in title.lower():
-            date = date_parsing(td_list[6].string)
-            break
-
+        if metadata['title'] in title or title in metadata['title']:
+            if len(td_list) == 8:
+                date = date_parsing(td_list[6].string)
+                break
+            elif len(td_list) == 7:
+                date = date_parsing(td_list[5].string)
+                break
     return date
 
 
