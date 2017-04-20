@@ -96,10 +96,10 @@ def scrape_78discography(archive_url, url):
     # page title contains publisher name
 
     page_title = soup.title.string.lower()
-    page_title = page_title.replace(" ", "")
+    page_title = page_title.split()[0]
     page_title = page_title.replace("-", "")
 
-    if metadata['publisher'] not in page_title:
+    if page_title not in metadata['publisher'] and metadata['publisher'] not in page_title:
         logger.warning('Publisher is not matched.')
         return ''
 
