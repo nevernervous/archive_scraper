@@ -41,10 +41,26 @@ def get_archive_metadata(url):
     url = url.replace('/details', '/metadata', 1)
     url += '/metadata'
     metadata = json.loads(urlopen(url).read().decode())
+
+    # some case, catalog number and title and publisher contains '-'.
+    # but in the 78discography.com site, it may or not contain '-'.
+    # to avoid this case, remove the space and '-'.
+
     catalog_number = metadata['result']['external-identifier'][1]
     catalog_number = catalog_number[catalog_number.rfind(':') + 1:]
     catalog_number = catalog_number.replace(" ", "")
+    catalog_number = catalog_number.replace("-", "")
     catalog_number = re.search('[a-zA-Z ]*(\d*)', catalog_number).group(1)
+
+    title = metadata['result']['title'].lower()
+    title = title.replace(" ", "")
+    title = title.replace("-", "")
+
+    publisher = metadata['result']['publisher'].lower()
+    publisher = publisher.replace(" ", "")
+    publisher = publisher.replace("-", "")
+
+    # creator info is not needed for searching date
 
     # if type(metadata['result']['creator']) is str:
     #     creator = metadata['result']['creator'].lower()
@@ -52,9 +68,9 @@ def get_archive_metadata(url):
     #     creator = metadata['result']['creator'][0].lower()
 
     data = {
-        'title': metadata['result']['title'].lower(),
+        'title': title,
         # 'creator': creator,
-        'publisher': metadata['result']['publisher'].lower(),
+        'publisher': publisher,
         'catalogNumber': catalog_number
     }
 
@@ -77,20 +93,25 @@ def scrape_78discography(archive_url, url):
         soup = get_soup(url)
         discography_soups[soup_key] = soup
 
+    # page title contains publisher name
+
     page_title = soup.title.string.lower()
+    page_title = page_title.replace(" ", "")
+    page_title = page_title.replace("-", "")
 
     if metadata['publisher'] not in page_title:
         logger.warning('Publisher is not matched.')
         return ''
 
-    for item in soup.find_all('td', text=re.compile('[a-zA-Z ]*({})'.format(metadata['catalogNumber']))):
+    for item in soup.find_all('td', text=re.compile('[a-zA-Z -]*({})'.format(metadata['catalogNumber']))):
         td_list = item.parent.select('td')
 
         # creator = td_list[1].string
 
         title = td_list[2].string.replace(" ", "")
         title = title.lower()
-        metadata['title'] = metadata['title'].replace(" ", "")
+        title = title.replace("-", "")
+
         if metadata['title'] in title or title in metadata['title']:
             if len(td_list) == 8:
                 date = date_parsing(td_list[6].string)
@@ -111,23 +132,22 @@ def scrape_45worlds(archive_url, url):
         return ''
 
     publisher = label_td.next_sibling.a.string.lower()
+    publisher = publisher.replace(" ", "")
+    publisher = publisher.replace("-", "")
+
     if not publisher.startswith(metadata['publisher']):
         logger.warning('Publisher is not matched.')
         return ''
 
     catalog_tr = label_td.parent.next_sibling.next_sibling
-    if metadata['catalogNumber'] == catalog_tr.contents[1].string:
+    catalog_number = catalog_tr.contents[1].string
+    catalog_number = catalog_number.replace(" ", "")
+    catalog_number = catalog_number.replace("-", "")
+    if metadata['catalogNumber'] in catalog_number:
         date = date_parsing(catalog_tr.next_sibling.contents[1].string)
     else:
         logger.warning('catalogNumber is not matched.')
 
-    return date
-
-
-def scrpae_adp(archive_url, url):
-    date = ''
-    # metadata = get_archive_metadata(archive_url)
-    # soup = get_soup(url)
     return date
 
 
