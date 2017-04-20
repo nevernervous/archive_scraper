@@ -42,15 +42,12 @@ def get_archive_metadata(url):
     url += '/metadata'
     metadata = json.loads(urlopen(url).read().decode())
 
-    # some case, catalog number and title and publisher contains '-'.
+    # some case, title and publisher contains '-'.
     # but in the 78discography.com site, it may or not contain '-'.
     # to avoid this case, remove the space and '-'.
 
     catalog_number = metadata['result']['external-identifier'][1]
     catalog_number = catalog_number[catalog_number.rfind(':') + 1:]
-    catalog_number = catalog_number.replace(" ", "")
-    catalog_number = catalog_number.replace("-", "")
-    catalog_number = re.search('[a-zA-Z ]*(\d*)', catalog_number).group(1)
 
     title = metadata['result']['title'].lower()
     title = title.replace(" ", "")
@@ -103,7 +100,12 @@ def scrape_78discography(archive_url, url):
         logger.warning('Publisher is not matched.')
         return ''
 
-    for item in soup.find_all('td', text=re.compile('[a-zA-Z -]*({})'.format(metadata['catalogNumber']))):
+    catalog_number = metadata['catalogNumber']
+    catalog_number = catalog_number.replace(" ", "")
+    catalog_number = catalog_number.replace("-", "")
+    catalog_number = re.search('[a-zA-Z ]*(\d*)', catalog_number).group(1)
+
+    for item in soup.find_all('td', text=re.compile('[a-zA-Z -]*({})'.format(catalog_number))):
         td_list = item.parent.select('td')
 
         # creator = td_list[1].string
@@ -119,6 +121,26 @@ def scrape_78discography(archive_url, url):
             elif len(td_list) == 7:
                 date = date_parsing(td_list[5].string)
                 break
+
+    if date is '':
+        catalog_number = metadata['catalogNumber']
+        for item in soup.find_all('td', text=catalog_number):
+            td_list = item.parent.select('td')
+
+            # creator = td_list[1].string
+
+            title = td_list[2].string.replace(" ", "")
+            title = title.lower()
+            title = title.replace("-", "")
+
+            if metadata['title'] in title or title in metadata['title']:
+                if len(td_list) == 8:
+                    date = date_parsing(td_list[6].string)
+                    break
+                elif len(td_list) == 7:
+                    date = date_parsing(td_list[5].string)
+                    break
+
     return date
 
 

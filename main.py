@@ -99,10 +99,9 @@ def main(input_file_name=None):
 
 
 if __name__ == '__main__':
-    # input_file_name = input('Enter the 78 dates text file:')
+    input_file_name = input('Enter the 78 dates text file:')
     logger.info('Start Scraping.')
-    # main(input_file_name)
-    main()
+    main(input_file_name)
 
 
 
