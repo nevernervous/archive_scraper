@@ -17,14 +17,14 @@ def get_certain_link(links):
     return -1, None
 
 
-def main(input_file_name=None):
+def main(file_name=None):
     result_folder = os.path.join('result', datetime.now().strftime('%H_%M_%d_%m_%Y'))
     if not os.path.exists(result_folder):
         os.makedirs(result_folder)
 
     archive_details_urls = []
     google_search_urls = []
-    with open(input_file_name, mode='r', encoding='utf-8') as f:
+    with open(file_name, mode='r', encoding='utf-8') as f:
         row_number = 1
         for row in f:
             data = row.rstrip('\n').split('\t')
