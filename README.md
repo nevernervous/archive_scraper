@@ -32,7 +32,7 @@ This file is for record that have no google search results.
 For record that has google search results but search results is not matched with certain sites such as `http://www.78discography.com/`
 
 ###### date_not_found_file.txt
-For record that has matched site but date is not founded due to publisher or catalog number or title is not matched.
+For record that has matched site but date is not founded due to publisher or catalog number or title or is not matched and date is unknown format.
 
 ##### have_to_scraped_again.txt 
 All of the above record is stored.
