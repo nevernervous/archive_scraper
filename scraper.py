@@ -42,7 +42,7 @@ def get_archive_metadata(url):
     catalog_number = metadata['result']['external-identifier'][1]
     catalog_number = catalog_number[catalog_number.rfind(':') + 1:]
     catalog_number = catalog_number.replace(" ", "")
-    catalog_number = re.search('[a-zA-Z]*(\d*)', catalog_number).group(1)
+    catalog_number = re.search('[a-zA-Z ]*(\d*)', catalog_number).group(1)
 
     # if type(metadata['result']['creator']) is str:
     #     creator = metadata['result']['creator'].lower()
@@ -71,7 +71,7 @@ def scrape_78discography(archive_url, url):
         logger.warning('Publisher is not matched.')
         return ''
 
-    for item in soup.find_all('td', text=metadata['catalogNumber']):
+    for item in soup.find_all('td', text=re.compile('[a-zA-Z ]*({})'.format(metadata['catalogNumber']))):
         td_list = item.parent.select('td')
 
         # creator = td_list[1].string

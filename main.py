@@ -23,9 +23,9 @@ def main():
 
     archive_details_urls = []
     google_search_urls = []
-    with open('78dates.txt', mode='r', encoding='utf-8') as f:
+    # with open('78dates.txt', mode='r', encoding='utf-8') as f:
     # with open('78dates_new.txt', mode='r', encoding='utf-8') as f:
-    # with open('test.txt', mode='r', encoding='utf-8') as f:
+    with open('test.txt', mode='r', encoding='utf-8') as f:
         row_number = 1
         for row in f:
             data = row.rstrip('\n').split('\t')
