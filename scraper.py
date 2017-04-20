@@ -6,6 +6,8 @@ import re
 import json
 import requests
 
+discography_soups = {}
+
 
 def get_soup(url):
     url = url.split()
@@ -64,7 +66,17 @@ def get_archive_metadata(url):
 def scrape_78discography(archive_url, url):
     date = ''
     metadata = get_archive_metadata(archive_url)
-    soup = get_soup(url)
+    soup_key = url[url.rfind('/') + 1:]
+    soup_key = soup_key[:soup_key.rfind('.')]
+
+    soup = None
+
+    if soup_key in discography_soups:
+        soup = discography_soups[soup_key]
+    else:
+        soup = get_soup(url)
+        discography_soups[soup_key] = soup
+
     page_title = soup.title.string.lower()
 
     if metadata['publisher'] not in page_title:

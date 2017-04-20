@@ -40,24 +40,27 @@ def main():
             archive_details_urls.append(data[1])
             google_search_urls.append(data[2])
 
-    failed_file = open(os.path.join(result_folder, 'failed.txt'), 'w')
+    date_not_found_file = open(os.path.join(result_folder, 'failed.txt'), 'w', encoding='utf-8')
+    no_google_search_result_file = open(os.path.join(result_folder, 'no_google_search_result.txt'), 'w', encoding='utf-8')
+    no_matched_site_file = open(os.path.join(result_folder, 'no_matched_site.txt'), 'w', encoding='utf-8')
+    error_file = open(os.path.join(result_folder, 'error.txt'), 'w', encoding='utf-8')
 
-    with open(os.path.join(result_folder, 'result.txt'), 'w') as f:
+    with open(os.path.join(result_folder, 'result.txt'), 'w', encoding='utf-8') as f:
         for i in range(len(archive_details_urls)):
             try:
                 logger.info('Searching for -- {} --\n archive url: {}\n google_search_url: {}'.format(i+1, archive_details_urls[i], google_search_urls[i]))
                 links = scraper.google_search(google_search_urls[i])
                 if len(links) == 0:
                     logger.warning('No search results.')
-                    failed_file.write('\t{}\t{}\n'.format(archive_details_urls[i], google_search_urls[i]))
-                    failed_file.flush()
+                    no_google_search_result_file.write('\t{}\t{}\n'.format(archive_details_urls[i], google_search_urls[i]))
+                    no_google_search_result_file.flush()
                     continue
 
                 site_index, link = get_certain_link(links)
                 if site_index == -1:
                     logger.warning('No matched site.')
-                    failed_file.write('\t{}\t{}\n'.format(archive_details_urls[i], google_search_urls[i]))
-                    failed_file.flush()
+                    no_matched_site_file.write('\t{}\t{}\n'.format(archive_details_urls[i], google_search_urls[i]))
+                    no_matched_site_file.flush()
                     continue
 
                 logger.info('Matched site: {}'.format(link))
@@ -72,18 +75,19 @@ def main():
                     date = scraper.scrpae_adp(archive_details_urls[i], link)
                 if date == '':
                     logger.warning('Date not found.')
-                    failed_file.write('\t{}\t{}\n'.format(archive_details_urls[i], google_search_urls[i]))
-                    failed_file.flush()
+                    date_not_found_file.write('\t{}\t{}\n'.format(archive_details_urls[i], google_search_urls[i]))
+                    date_not_found_file.flush()
                     continue
                 else:
                     logger.info('Date: {}'.format(date))
 
-                f.write('{}\t{}\t{}\n'.format(archive_details_urls[i], date, link))
+                f.write('{}\t{}\t{}\n'.format(date, archive_details_urls[i], link))
                 f.flush()
             except KeyboardInterrupt:
                 exit()
             except:
                 logger.error(traceback.format_exc())
+                error_file.write('\t{}\t{}\n'.format(archive_details_urls[i], google_search_urls[i]))
 
 
 if __name__ == '__main__':
